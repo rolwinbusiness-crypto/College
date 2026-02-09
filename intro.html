@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Book My Show - Ticket Booking</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f4;
+            }
+            .container {
+                width: 90%;
+                margin: auto;
+                overflow: hidden;
+            }
+            header {
+                background: linear-gradient(to right, #ff416c, #ff4b2b);
+                color: #fff;
+                padding: 15px 0;
+                text-align: center;
+                font-size: 24px;
+                font-weight: bold;
+            }
+            .seating-layout {
+                display: flex;
+                justify-content: space-between;
+                margin: 20px 0;
+            }
+            .section {
+                display: grid;
+                grid-template-columns: repeat(10, 1fr);
+                gap: 10px;
+                padding: 10px;
+                background: #fff;
+                border: 2px solid #ddd;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            .seat {
+                width: 40px;
+                height: 40px;
+                background: url('seat-icon.png') no-repeat center center;
+                background-size: contain;
+                border: 1px solid #999;
+                border-radius: 5px;
+                text-align: center;
+                line-height: 40px;
+                cursor: pointer;
+                position: relative;
+            }
+            .seat span {
+                display: none;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 12px;
+                font-weight: bold;
+                color: #000;
+            }
+            .seat.selected span {
+                display: block;
+            }
+            .seat.selected {
+                background-color: #6c6;
+            }
+            .seat.occupied {
+                background-color: #f00;
+                cursor: not-allowed;
+            }
+            .seat[data-price="800"] {
+                background-color: #ffcccb;
+            }
+            .seat[data-price="600"] {
+                background-color: #add8e6;
+            }
+            .seat[data-price="500"] {
+                background-color: #d3ffd3;
+            }
+            .actions {
+                text-align: center;
+                margin: 20px 0;
+            }
+            .actions button {
+                padding: 10px 20px;
+                background-color: #333;
+                color: #fff;
+                border: none;
+                cursor: pointer;
+                border-radius: 5px;
+            }
+            .actions button:hover {
+                background-color: #555;
+            }
+            /* Popup CSS */
+            .popup {
+                display: none;
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 400px;
+                background: #fff;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                padding: 20px;
+                z-index: 1000;
+                text-align: center;
+            }
+            .popup h2 {
+                margin: 0 0 20px;
+                font-size: 20px;
+                color: #333;
+            }
+            .popup p {
+                margin: 10px 0;
+                font-size: 16px;
+                color: #555;
+            }
+            .popup button {
+                padding: 10px 20px;
+                background-color: #ff416c;
+                color: #fff;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            .popup button:hover {
+                background-color: #ff4b2b;
+            }
+            .popup-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            Book Your Show - Choose Your Seats
+        </header>
+        <div class="container">
+            <h2>Select Your Seats</h2>
+            <div class="seating-layout">
+                <!-- Left Section -->
+                <div class="section" id="left-section">
+                    <!-- Generate 160 seats dynamically for left section -->
+                    <script>
+                        const leftSection = document.getElementById('left-section');
+                        let serialNumber = 1001;
+                        for (let i = 1; i <= 16; i++) {
+                            for (let j = 1; j <= 10; j++) {
+                                const seat = document.createElement('div');
+                                const row = i;
+                                const price = row <= 2 ? 800 : row <= 10 ? 600 : 500;
+                                seat.className = 'seat';
+                                seat.dataset.seat = serialNumber;
+                                seat.dataset.price = price;
+                                const seatNumber = document.createElement('span');
+                                seatNumber.textContent = serialNumber;
+                                seat.appendChild(seatNumber);
+                                leftSection.appendChild(seat);
+                                serialNumber++;
+                            }
+                        }
+                    </script>
+                </div>
+                <!-- Right Section -->
+                <div class="section" id="right-section">
+                    <!-- Generate 160 seats dynamically for right section -->
+                    <script>
+                        const rightSection = document.getElementById('right-section');
+                        for (let i = 1; i <= 16; i++) {
+                            for (let j = 1; j <= 10; j++) {
+                                const seat = document.createElement('div');
+                                const row = i;
+                                const price = row <= 2 ? 800 : row <= 10 ? 600 : 500;
+                                seat.className = 'seat';
+                                seat.dataset.seat = serialNumber;
+                                seat.dataset.price = price;
+                                const seatNumber = document.createElement('span');
+                                seatNumber.textContent = serialNumber;
+                                seat.appendChild(seatNumber);
+                                rightSection.appendChild(seat);
+                                serialNumber++;
+                            }
+                        }
+                    </script>
+                </div>
+            </div>
+            <div class="actions">
+                <button id="proceedToPayment">Proceed to Payment</button>
+            </div>
+        </div>
+        <script>
+            const seats = document.querySelectorAll('.seat');
+            const proceedButton = document.getElementById('proceedToPayment');
+
+            seats.forEach(seat => {
+                seat.addEventListener('click', () => {
+                    if (!seat.classList.contains('occupied')) {
+                        seat.classList.toggle('selected');
+                    }
+                });
+            });
+
+            proceedButton.addEventListener('click', () => {
+                const selectedSeats = Array.from(document.querySelectorAll('.seat.selected'));
+                const totalPrice = selectedSeats.reduce((sum, seat) => sum + parseInt(seat.dataset.price), 0);
+
+                if (selectedSeats.length > 0) {
+                    // Redirect to payment gateway
+                    window.location.href = 'payment_gateway.html';
+                } else {
+                    alert('Please select at least one seat.');
+                }
+            });
+        </script>
+    </body>
+</html>
